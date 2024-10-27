@@ -1,31 +1,68 @@
-import React, { createContext, useContext, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { createContext, useContext, useEffect, useState } from "react";
+
+type User = {
+  id: string;
+  username: string;
+  email: string;
+};
 
 type AuthContextType = {
-  isLoggedIn: boolean;
-  login: () => void;
-  logout: () => void;
+  user: User | null;
+  login: (user: User) => Promise<void>;
+  logout: () => Promise<void>;
+  isLoading: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = () => setIsLoggedIn(true);
-  const logout = () => setIsLoggedIn(false);
+  useEffect(() => {
+    // Charger l'utilisateur depuis le stockage local au démarrage
+    loadUser();
+  }, []);
+
+  const loadUser = async () => {
+    try {
+      const userJson = await AsyncStorage.getItem("user");
+      if (userJson) {
+        setUser(JSON.parse(userJson));
+      }
+    } catch (e) {
+      console.error("Erreur lors du chargement de l'utilisateur", e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const login = async (userData: User) => {
+    setUser(userData);
+    await AsyncStorage.setItem("user", JSON.stringify(userData));
+  };
+
+  const logout = async () => {
+    setUser(null);
+    await AsyncStorage.removeItem("user");
+  };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error(
+      "useAuth doit être utilisé à l'intérieur d'un AuthProvider"
+    );
   }
   return context;
-}
-
+};
