@@ -34,8 +34,7 @@ export default function LoginScreen() {
           body: JSON.stringify({ email, password }),
         }
       );
-
-      if (response.ok) {
+       if (response.ok) {
         const user = await response.json();
         await login(user);
         router.replace("/(tabs)/home");
