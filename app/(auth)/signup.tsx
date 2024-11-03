@@ -12,16 +12,48 @@ import {
 } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 
+// Déclaration des types
+type PasswordStrength = { level: string; color: string };
+type Errors = { username?: string; email?: string; password?: string };
+
+// Fonction de vérification de la force du mot de passe
+const getPasswordStrength = (password: string): PasswordStrength => {
+  let strength = 0;
+
+  if (password.length >= 8) strength += 1;
+  if (/[A-Z]/.test(password)) strength += 1;
+  if (/[a-z]/.test(password)) strength += 1;
+  if (/[0-9]/.test(password)) strength += 1;
+  if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+
+  if (strength <= 2) return { level: "Faible", color: "red" };
+  if (strength === 3) return { level: "Moyen", color: "orange" };
+  return { level: "Fort", color: "green" };
+};
+
 export default function SignupScreen() {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [username, setUsername] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errors, setErrors] = useState<Errors>({});
   const { login } = useAuth();
   const router = useRouter();
 
+  // Évaluer la force du mot de passe en temps réel
+  const passwordStrength = getPasswordStrength(password);
+
   const handleSignup = async () => {
+    let newErrors: Errors = {};
+    if (!username) newErrors.username = "Nom d'utilisateur requis";
+    if (!email) newErrors.email = "Email requis";
+    if (!password) newErrors.password = "Mot de passe requis";
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) return;
+
     setIsLoading(true);
 
     try {
@@ -40,14 +72,11 @@ export default function SignupScreen() {
       console.log("Réponse du serveur:", data);
 
       if (response.ok) {
-        // Vérifiez que data contient les informations utilisateur nécessaires
         // const user = {
         //   id: data.id,
         //   username: data.username,
-        //   email: data.email
+        //   email: data.email,
         // };
-
-        // Ne pas connecter l'utilisateur après l'inscription
         // await login(user);
         router.replace("/(auth)/login");
       } else {
@@ -62,6 +91,7 @@ export default function SignupScreen() {
       setIsLoading(false);
     }
   };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -71,7 +101,7 @@ export default function SignupScreen() {
         Inscription
       </Text>
 
-      <View className="flex-row items-center px-4 py-3 mb-4 bg-gray-100 rounded-lg">
+      <View className="flex-row items-center px-4 py-3 mb-2 bg-gray-100 rounded-lg">
         <Ionicons name="person-outline" size={24} color="#3b5998" />
         <TextInput
           className="flex-1 ml-2 text-gray-700"
@@ -80,8 +110,11 @@ export default function SignupScreen() {
           onChangeText={setUsername}
         />
       </View>
+      {errors.username && (
+        <Text style={{ color: "red", marginBottom: 8 }}>{errors.username}</Text>
+      )}
 
-      <View className="flex-row items-center px-4 py-3 mb-4 bg-gray-100 rounded-lg">
+      <View className="flex-row items-center px-4 py-3 mb-2 bg-gray-100 rounded-lg">
         <Ionicons name="mail-outline" size={24} color="#3b5998" />
         <TextInput
           className="flex-1 ml-2 text-gray-700"
@@ -92,8 +125,11 @@ export default function SignupScreen() {
           autoCapitalize="none"
         />
       </View>
+      {errors.email && (
+        <Text style={{ color: "red", marginBottom: 8 }}>{errors.email}</Text>
+      )}
 
-      <View className="flex-row items-center px-4 py-3 mb-6 bg-gray-100 rounded-lg">
+      <View className="flex-row items-center px-4 py-3 mb-2 bg-gray-100 rounded-lg">
         <Ionicons name="lock-closed-outline" size={24} color="#3b5998" />
         <TextInput
           className="flex-1 ml-2 text-gray-700"
@@ -110,6 +146,16 @@ export default function SignupScreen() {
           />
         </TouchableOpacity>
       </View>
+      {errors.password && (
+        <Text style={{ color: "red", marginBottom: 8 }}>{errors.password}</Text>
+      )}
+
+      {/* Indicateur de force du mot de passe */}
+      {password && (
+        <Text style={{ color: passwordStrength.color, marginBottom: 16 }}>
+          Force du mot de passe : {passwordStrength.level}
+        </Text>
+      )}
 
       <TouchableOpacity
         className="py-4 mb-4 bg-blue-500 rounded-lg"

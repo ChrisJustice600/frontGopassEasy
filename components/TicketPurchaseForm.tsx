@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  ScrollView,
   Text,
   TouchableOpacity,
   View,
@@ -54,63 +55,71 @@ const TicketPurchaseForm = () => {
         shadowOpacity: 0.1,
       }}
     >
-      <Text style={{ marginBottom: 10, fontSize: 16, fontWeight: "bold" }}>
-        Achetez votre ticket Go Pass
-      </Text>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <Text style={{ marginBottom: 10, fontSize: 16, fontWeight: "bold" }}>
+          Achetez votre ticket Go Pass
+        </Text>
 
-      <Text style={{ marginVertical: 4, color: "gray" }}>Type de vol</Text>
-      <Picker
-        selectedValue={flightType}
-        onValueChange={(value) => setFlightType(value)}
-        style={{ backgroundColor: "#e8eef3", borderRadius: 8 }}
-      >
-        <Picker.Item label="National" value="NATIONAL" />
-        <Picker.Item label="International" value="INTERNATIONAL" />
-      </Picker>
+        <Text style={{ marginVertical: 4, color: "gray" }}>Type de vol</Text>
+        <Picker
+          selectedValue={flightType}
+          onValueChange={(value) => setFlightType(value)}
+          style={{ backgroundColor: "#e8eef3", borderRadius: 8 }}
+        >
+          <Picker.Item label="National" value="NATIONAL" />
+          <Picker.Item label="International" value="INTERNATIONAL" />
+        </Picker>
 
-      <Text style={{ marginVertical: 4, color: "gray" }}>Mode de paiement</Text>
-      <Picker
-        selectedValue={paymentMethod}
-        onValueChange={(value) => setPaymentMethod(value)}
-        style={{ backgroundColor: "#e8eef3", borderRadius: 8 }}
-      >
-        <Picker.Item label="Carte bancaire" value="CARD" />
-        <Picker.Item label="Mobile Money" value="MOBILE_MONEY" />
-      </Picker>
+        <Text style={{ marginVertical: 4, color: "gray" }}>
+          Mode de paiement
+        </Text>
+        <Picker
+          selectedValue={paymentMethod}
+          onValueChange={(value) => setPaymentMethod(value)}
+          style={{ backgroundColor: "#e8eef3", borderRadius: 8 }}
+        >
+          <Picker.Item label="Carte bancaire" value="CARD" />
+          <Picker.Item label="Mobile Money" value="MOBILE_MONEY" />
+        </Picker>
 
-      <TouchableOpacity
-        onPress={handlePurchase}
-        style={{
-          backgroundColor: "#007bff",
-          borderRadius: 8,
-          marginTop: 16,
-          padding: 12,
-        }}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text
-            style={{ color: "white", fontWeight: "bold", textAlign: "center" }}
-          >
-            Acheter
-          </Text>
+        <TouchableOpacity
+          onPress={handlePurchase}
+          style={{
+            backgroundColor: "#007bff",
+            borderRadius: 8,
+            marginTop: 16,
+            padding: 12,
+          }}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text
+              style={{
+                color: "white",
+                fontWeight: "bold",
+                textAlign: "center",
+              }}
+            >
+              Acheter
+            </Text>
+          )}
+        </TouchableOpacity>
+
+        {/* Affichage du QR code si disponible */}
+        {qrCode && (
+          <View style={{ marginTop: 16, alignItems: "center" }}>
+            <Text style={{ marginBottom: 8, fontSize: 16, fontWeight: "bold" }}>
+              Code QR de votre ticket
+            </Text>
+            <Image
+              source={{ uri: qrCode }}
+              style={{ width: 200, height: 200 }}
+              resizeMode="contain"
+            />
+          </View>
         )}
-      </TouchableOpacity>
-
-      {/* Affichage du QR code si disponible */}
-      {qrCode && (
-        <View style={{ marginTop: 16, alignItems: "center" }}>
-          <Text style={{ marginBottom: 8, fontSize: 16, fontWeight: "bold" }}>
-            Code QR de votre ticket
-          </Text>
-          <Image
-            source={{ uri: qrCode }}
-            style={{ width: 200, height: 200 }}
-            resizeMode="contain"
-          />
-        </View>
-      )}
+      </ScrollView>
     </Animated.View>
   );
 };
