@@ -1,3 +1,4 @@
+// AuthContext.tsx
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
@@ -12,6 +13,7 @@ type AuthContextType = {
   user: User | null;
   login: (user: User) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (userData: Partial<User>) => Promise<void>; // Ajoutez cette ligne
   isLoading: boolean;
 };
 
@@ -24,7 +26,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Charger l'utilisateur depuis le stockage local au démarrage
     loadUser();
   }, []);
 
@@ -51,8 +52,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     await AsyncStorage.removeItem("user");
   };
 
+  // Méthode pour mettre à jour les informations utilisateur
+  const updateUser = async (userData: Partial<User>) => {
+    if (user) {
+      const updatedUser = { ...user, ...userData }; // Mettre à jour l'utilisateur
+      setUser(updatedUser);
+      await AsyncStorage.setItem("user", JSON.stringify(updatedUser)); // Sauvegarder dans AsyncStorage
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider
+      value={{ user, login, logout, updateUser, isLoading }}
+    >
       {children}
     </AuthContext.Provider>
   );

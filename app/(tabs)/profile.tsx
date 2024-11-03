@@ -1,6 +1,7 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 
 export default function ProfileScreen() {
@@ -12,17 +13,52 @@ export default function ProfileScreen() {
     router.replace("/(auth)/login");
   };
 
+  const handleEditProfile = () => {
+    router.push("/(profile)/edit"); // Redirige vers l'écran de modification du profil
+  };
+
   return (
-    <View className="items-center justify-center flex-1 bg-white">
-      <Text className="mb-4 text-2xl font-bold">
-        Profil de {user?.username}
-      </Text>
-      <Text className="mb-2 text-xl">Email: {user?.email}</Text>
+    <View className="items-center justify-center flex-1 px-6 bg-gray-100">
+      {/* Avatar utilisateur */}
+      <View className="w-32 h-32 mb-6 overflow-hidden border-4 border-blue-500 rounded-full">
+        <Image
+          source={{
+            uri: "https://via.placeholder.com/150",
+          }}
+          className="w-full h-full rounded-full"
+        />
+      </View>
+
+      {/* Informations utilisateur */}
+      <View className="items-center mb-8">
+        <Text className="text-3xl font-bold text-gray-900">
+          Profil de {user?.username}
+        </Text>
+        <Text className="mt-1 text-lg text-gray-600">
+          Email : {user?.email}
+        </Text>
+      </View>
+
+      {/* Bouton Modifier les informations */}
       <TouchableOpacity
-        className="px-4 py-2 mt-8 bg-red-500 rounded-lg"
+        className="flex-row items-center px-5 py-3 mb-4 bg-blue-600 rounded-lg shadow-lg"
+        onPress={handleEditProfile}
+      >
+        <Ionicons name="pencil" size={20} color="white" />
+        <Text className="ml-2 text-lg font-semibold text-white">
+          Modifier les informations
+        </Text>
+      </TouchableOpacity>
+
+      {/* Bouton Se déconnecter */}
+      <TouchableOpacity
+        className="flex-row items-center px-5 py-3 bg-red-500 rounded-lg shadow-lg"
         onPress={handleLogout}
       >
-        <Text className="font-bold text-white">Se déconnecter</Text>
+        <Ionicons name="log-out-outline" size={20} color="white" />
+        <Text className="ml-2 text-lg font-semibold text-white">
+          Se déconnecter
+        </Text>
       </TouchableOpacity>
     </View>
   );

@@ -130,7 +130,7 @@ export default function UserTicketsScreen() {
                     : "text-red-600"
                 }`}
               >
-                TICKET {item.status.toUpperCase()}
+                TICKET {item.status.toUpperCase()}E
               </Text>
             </View>
 
