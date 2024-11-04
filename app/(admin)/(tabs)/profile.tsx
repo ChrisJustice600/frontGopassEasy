@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
@@ -14,7 +14,7 @@ export default function ProfileScreen() {
   };
 
   const handleEditProfile = () => {
-    router.push("/(profile)/edit"); // Redirige vers l'écran de modification du profil
+    router.push("/(user)/(profile)/edit"); // Redirige vers l'écran de modification du profil
   };
 
   return (

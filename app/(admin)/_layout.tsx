@@ -1,6 +1,6 @@
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
-import { AuthProvider, useAuth } from "../context/AuthContext";
+import { AuthProvider, useAuth } from "../../context/AuthContext";
 
 function RootLayoutNav() {
   const { user, isLoading } = useAuth();
@@ -14,23 +14,15 @@ function RootLayoutNav() {
       // Redirige vers la page de connexion si l'utilisateur n'est pas authentifié
       router.replace("/(auth)/login");
     } else if (user && segments[0] === "(auth)") {
-      // Redirige vers la page d'accueil en fonction du rôle de l'utilisateur
-      if (user.role === "ADMIN") {
-        router.replace("/(admin)/(tabs)/home");
-      } else if (user.role === "USER") {
-        router.replace("/(user)/(tabs)/home");
-      } else {
-        console.warn("Rôle utilisateur non reconnu :", user.role);
-        // Vous pouvez rediriger vers une page par défaut ou afficher un message d'erreur
-      }
+      // Redirige vers la page d'accueil si l'utilisateur est déjà authentifié
+      router.replace("/(tabs)/home");
     }
   }, [user, segments, isLoading]);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(admin)" options={{ headerShown: false }} />
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      <Stack.Screen name="(user)" options={{ headerShown: false }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="(profile)" options={{ headerShown: false }} />
     </Stack>
   );
 }

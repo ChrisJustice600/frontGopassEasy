@@ -34,10 +34,16 @@ export default function LoginScreen() {
           body: JSON.stringify({ email, password }),
         }
       );
-       if (response.ok) {
+      if (response.ok) {
         const user = await response.json();
         await login(user);
-        router.replace("/(tabs)/home");
+        // Redirection en fonction du rôle
+        if (user.role === "ADMIN") {
+          router.replace("/(admin)/(tabs)/home"); // Remplacez par la route admin
+        } else {
+          router.replace("/(user)/(tabs)/home"); // Remplacez par la route user
+        }
+        // router.replace("/(tabs)/home");
       } else {
         console.error("Échec de la connexion");
         // Vous pouvez ajouter ici une alerte ou un message d'erreur pour l'utilisateur

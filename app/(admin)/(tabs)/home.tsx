@@ -1,7 +1,7 @@
 import React from "react";
 import { Text, View } from "react-native";
-import TicketPurchaseForm from "../../components/TicketPurchaseForm";
-import { useAuth } from "../../context/AuthContext";
+import TicketPurchaseForm from "../../../components/TicketPurchaseForm";
+import { useAuth } from "../../../context/AuthContext";
 
 const HomeScreen = () => {
   const { user } = useAuth();

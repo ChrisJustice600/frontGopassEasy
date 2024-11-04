@@ -7,7 +7,7 @@ import {
   View,
 } from "react-native";
 import * as Animatable from "react-native-animatable";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function EditProfileScreen() {
   const { user, updateUser } = useAuth(); // Assurez-vous que `updateUser` est une fonction pour mettre à jour les infos utilisateur
