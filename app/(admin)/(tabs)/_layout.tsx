@@ -20,11 +20,11 @@ export default function TabLayout() {
         />
 
         <Tabs.Screen
-          name="ticket"
+          name="scan"
           options={{
-            title: "Ticket",
+            title: "Scan",
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="ticket" size={size} color={color} />
+              <Ionicons name="scan" size={size} color={color} />
             ),
           }}
         />

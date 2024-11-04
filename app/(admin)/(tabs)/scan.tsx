@@ -16,19 +16,61 @@ export function QRScanner() {
   async function handleBarcodeScanned(data: BarcodeScanningResult) {
     const scannedItem = data.data;
 
+    // Éviter de re-scanner le même code
     if (items.includes(scannedItem)) return;
 
     setItems((state) => [...state, scannedItem]);
 
     try {
       const response = await axios.post(
-        "http://votre-serveur/api/scanTickets",
+        "https://gopasseasy.onrender.com/api/agent/scan",
         { qrCode: scannedItem }
       );
-      Alert.alert("Succès", response.data.message);
-    } catch (error) {
-      Alert.alert("Une erreur est survenue lors de la validation.");
+
+      const { message, ticket } = response.data;
+
+      // Vérifiez si les données du ticket existent avant d'afficher l'alerte
+      if (ticket) {
+        Alert.alert(
+          "Succès",
+          `${message}\n\nInformations du ticket:\n` +
+            `- ID: ${ticket.id}\n` +
+            `- Utilisateur: ${ticket.user?.username || "Non spécifié"}\n` +
+            `- Type de vol: ${ticket.flightType || "Non spécifié"}\n` +
+            `- Montant de la transaction: ${
+              ticket.transaction?.amount || "Non spécifié"
+            }\n` +
+            `- Méthode de paiement: ${
+              ticket.transaction?.paymentMethod || "Non spécifiée"
+            }\n`
+        );
+      } else {
+        Alert.alert("Erreur", "Les informations du ticket sont incomplètes.");
+      }
+
+      // Désactiver le scan temporairement
+      setScanning(false);
+    } catch (error: any) {
+      if (axios.isAxiosError(error) && error.response) {
+        // Si l'erreur vient du serveur, afficher le message d'erreur
+        console.error("Erreur serveur :", error.response.data);
+        Alert.alert(
+          "Erreur",
+          error.response.data.error ||
+            "Une erreur est survenue lors de la validation."
+        );
+      } else {
+        // Si l'erreur est liée au réseau ou autre
+        console.error("Erreur réseau :", error.message);
+        Alert.alert("Erreur", "Une erreur réseau est survenue.");
+      }
     }
+  }
+
+  function resetScanner() {
+    // Réinitialiser l'état pour permettre un nouveau scan
+    setItems([]);
+    setScanning(true);
   }
 
   if (!permission) return null;
@@ -65,7 +107,7 @@ export function QRScanner() {
           backgroundColor: "rgba(0, 0, 0, 0.5)",
           justifyContent: "center",
           alignItems: "center",
-          borderColor: "#00FF00", // Couleur verte pour un effet "viseur"
+          borderColor: "#00FF00",
           borderWidth: 2,
           borderRadius: 12,
         }}
@@ -74,10 +116,17 @@ export function QRScanner() {
 
         <View style={{ position: "absolute", top: 16, right: 16 }}>
           <TouchableOpacity
-            onPress={() => setScanning(!scanning)}
+            onPress={resetScanner}
             activeOpacity={0.7}
+            style={{
+              backgroundColor: "red",
+              padding: 8,
+              borderRadius: 8,
+            }}
           >
-            {/* <AntDesign size={24} name="close" color="#FFF" /> */}
+            <Text style={{ color: "white", fontWeight: "bold" }}>
+              Reprendre le scan
+            </Text>
           </TouchableOpacity>
         </View>
 

@@ -1,3 +1,4 @@
+import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -10,31 +11,33 @@ import * as Animatable from "react-native-animatable";
 import { useAuth } from "../../../context/AuthContext";
 
 export default function EditProfileScreen() {
-  const { user, updateUser } = useAuth(); // Assurez-vous que `updateUser` est une fonction pour mettre à jour les infos utilisateur
+  const { user, updateUser } = useAuth();
   const [username, setUsername] = useState(user?.username || "");
   const [email, setEmail] = useState(user?.email || "");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const navigation = useNavigation(); // Pour naviguer en arrière
 
   const handleSaveChanges = async () => {
     setLoading(true);
     setSuccess(false);
 
-    // Simuler un délai de chargement pour l'expérience utilisateur
-    setTimeout(async () => {
-      try {
-        await updateUser({ username, email });
-        setSuccess(true);
-      } catch (error) {
-        console.error("Erreur de mise à jour :", error);
-      } finally {
-        setLoading(false);
-      }
-    }, 1500);
+    try {
+      await updateUser({ username, email });
+      setSuccess(true);
+    } catch (error) {
+      console.error("Erreur de mise à jour :", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <View className="flex-1 px-6 pt-12 bg-gray-100">
+      <TouchableOpacity onPress={() => navigation.goBack()}>
+        <Text style={{ color: "blue", marginBottom: 10 }}>Retour</Text>
+      </TouchableOpacity>
+
       <Animatable.Text
         animation="fadeInDown"
         duration={600}
@@ -44,7 +47,7 @@ export default function EditProfileScreen() {
       </Animatable.Text>
 
       <Animatable.View animation="fadeInUp" duration={800} delay={200}>
-        {/* Champ Nom d'utilisateur */}
+        {/* Champs Nom d'utilisateur et Email */}
         <View className="mb-4">
           <Text className="mb-2 text-lg font-semibold text-gray-700">
             Nom d'utilisateur
@@ -56,8 +59,6 @@ export default function EditProfileScreen() {
             className="p-4 text-gray-900 bg-white border border-gray-300 rounded-lg"
           />
         </View>
-
-        {/* Champ Email */}
         <View className="mb-4">
           <Text className="mb-2 text-lg font-semibold text-gray-700">
             Email
