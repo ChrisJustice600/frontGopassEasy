@@ -1,5 +1,5 @@
-// AuthContext.tsx
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios"; // Assurez-vous d'importer axios
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 type User = {
@@ -14,7 +14,7 @@ type AuthContextType = {
   user: User | null;
   login: (user: User) => Promise<void>;
   logout: () => Promise<void>;
-  updateUser: (userData: Partial<User>) => Promise<void>; // Ajoutez cette ligne
+  updateUser: (userData: Partial<User>) => Promise<void>;
   isLoading: boolean;
 };
 
@@ -55,10 +55,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Méthode pour mettre à jour les informations utilisateur
   const updateUser = async (userData: Partial<User>) => {
-    if (user) {
-      const updatedUser = { ...user, ...userData }; // Mettre à jour l'utilisateur
+    if (!user) return;
+
+    try {
+      // Appel API pour mettre à jour l'utilisateur côté serveur
+      const response = await axios.put(
+        "https://gopasseasy.onrender.com/auth/update",
+        userData
+      );
+
+      // Mise à jour du contexte avec les nouvelles infos reçues du serveur
+      const updatedUser = { ...user, ...response.data.user };
       setUser(updatedUser);
-      await AsyncStorage.setItem("user", JSON.stringify(updatedUser)); // Sauvegarder dans AsyncStorage
+      await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du profil :", error);
     }
   };
 

@@ -3,6 +3,7 @@ import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Text,
@@ -20,9 +21,20 @@ export default function LoginScreen() {
   const { login } = useAuth();
   const router = useRouter();
 
-  const handleLogin = async () => {
-    setIsLoading(true);
+  // Validation email regex
+  const isValidEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
+  const handleLogin = async () => {
+    // Validation des champs
+    if (!email || !password) {
+      return Alert.alert("Erreur", "Tous les champs doivent être remplis.");
+    }
+    if (!isValidEmail(email)) {
+      return Alert.alert("Erreur", "L'adresse e-mail est invalide.");
+    }
+
+    setIsLoading(true);
     try {
       const response = await fetch(
         "https://gopasseasy.onrender.com/auth/signin",
@@ -34,23 +46,28 @@ export default function LoginScreen() {
           body: JSON.stringify({ email, password }),
         }
       );
+
+      const result = await response.json();
+
       if (response.ok) {
-        const user = await response.json();
-        await login(user);
+        await login(result);
+
         // Redirection en fonction du rôle
-        if (user.role === "ADMIN") {
-          router.replace("/(admin)/(tabs)/home"); // Remplacez par la route admin
+        if (result.role === "ADMIN") {
+          router.replace("/(admin)/(tabs)/scan");
         } else {
-          router.replace("/(user)/(tabs)/home"); // Remplacez par la route user
+          router.replace("/(user)/(tabs)/home");
         }
-        // router.replace("/(tabs)/home");
       } else {
-        console.error("Échec de la connexion");
-        // Vous pouvez ajouter ici une alerte ou un message d'erreur pour l'utilisateur
+        // Affichage des messages d'erreur du serveur
+        Alert.alert(
+          "Erreur de connexion",
+          result.error || "Une erreur s'est produite."
+        );
       }
     } catch (error) {
       console.error("Erreur lors de la connexion:", error);
-      // Vous pouvez ajouter ici une alerte ou un message d'erreur pour l'utilisateur
+      Alert.alert("Erreur réseau", "Vérifiez votre connexion Internet.");
     } finally {
       setIsLoading(false);
     }

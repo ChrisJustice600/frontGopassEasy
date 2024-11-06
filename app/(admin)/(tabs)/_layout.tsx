@@ -10,16 +10,6 @@ export default function TabLayout() {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <Tabs>
         <Tabs.Screen
-          name="home"
-          options={{
-            title: "Accueil",
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="home" size={size} color={color} />
-            ),
-          }}
-        />
-
-        <Tabs.Screen
           name="scan"
           options={{
             title: "Scan",
@@ -30,9 +20,9 @@ export default function TabLayout() {
         />
 
         <Tabs.Screen
-          name="profile"
+          name="profileAdmin"
           options={{
-            title: "Profil",
+            title: "ProfilAdmin",
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="person" size={size} color={color} />
             ),
