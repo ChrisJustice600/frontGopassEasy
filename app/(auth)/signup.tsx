@@ -16,6 +16,9 @@ import { useAuth } from "../../context/AuthContext";
 type PasswordStrength = { level: string; color: string };
 type Errors = { username?: string; email?: string; password?: string };
 
+// Regex pour valider l'email
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 // Fonction de vérification de la force du mot de passe
 const getPasswordStrength = (password: string): PasswordStrength => {
   let strength = 0;
@@ -46,9 +49,21 @@ export default function SignupScreen() {
 
   const handleSignup = async () => {
     let newErrors: Errors = {};
+
+    // Validation des champs
     if (!username) newErrors.username = "Nom d'utilisateur requis";
-    if (!email) newErrors.email = "Email requis";
-    if (!password) newErrors.password = "Mot de passe requis";
+    if (!email) {
+      newErrors.email = "Email requis";
+    } else if (!EMAIL_REGEX.test(email)) {
+      newErrors.email = "Adresse email invalide";
+    }
+
+    if (!password) {
+      newErrors.password = "Mot de passe requis";
+    } else if (passwordStrength.level === "Faible") {
+      newErrors.password =
+        "Mot de passe trop faible. Incluez des majuscules, des chiffres et des caractères spéciaux.";
+    }
 
     setErrors(newErrors);
 
@@ -72,12 +87,6 @@ export default function SignupScreen() {
       console.log("Réponse du serveur:", data);
 
       if (response.ok) {
-        // const user = {
-        //   id: data.id,
-        //   username: data.username,
-        //   email: data.email,
-        // };
-        // await login(user);
         router.replace("/(auth)/login");
       } else {
         console.error(
