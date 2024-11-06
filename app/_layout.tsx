@@ -16,7 +16,7 @@ function RootLayoutNav() {
     } else if (user && segments[0] === "(auth)") {
       // Redirige vers la page d'accueil en fonction du rôle de l'utilisateur
       if (user.role === "ADMIN") {
-        router.replace("/(admin)/(tabs)/home");
+        router.replace("/(admin)/(tabs)/scan");
       } else if (user.role === "USER") {
         router.replace("/(user)/(tabs)/home");
       } else {
