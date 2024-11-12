@@ -1,3 +1,4 @@
+import { TicketsProvider } from "@/context/TicketsContext";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
 import { AuthProvider, useAuth } from "../context/AuthContext";
@@ -37,8 +38,10 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <RootLayoutNav />
-    </AuthProvider>
+    <TicketsProvider>
+      <AuthProvider>
+        <RootLayoutNav />
+      </AuthProvider>
+    </TicketsProvider>
   );
 }

@@ -1,23 +1,11 @@
-import { Ionicons, MaterialIcons } from "@expo/vector-icons"; // Assurez-vous d'installer Ionicons pour l'icône de validation
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Image, Text, View } from "react-native";
 import { useAuth } from "../../../context/AuthContext";
-
-interface Transaction {
-  amount: number;
-  paymentMethod: string;
-}
-interface Ticket {
-  id: number;
-  flightType: string;
-  transaction: Transaction;
-  createdAt: string;
-  status: string;
-  qrCode?: string;
-}
+import { useTickets } from "../../../context/TicketsContext"; // Importez le hook du contexte
 
 export default function UserTicketsScreen() {
-  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const { tickets, setTickets } = useTickets(); // Utilisez le contexte des tickets
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
 
@@ -31,14 +19,14 @@ export default function UserTicketsScreen() {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user?.token}`,
             },
           }
         );
 
         if (response.ok) {
           const data = await response.json();
-          setTickets(data);
+          setTickets(data); // Mettez à jour les tickets dans le contexte
+          console.log(data);
         } else {
           console.error("Erreur lors de la récupération des tickets");
         }
@@ -52,8 +40,8 @@ export default function UserTicketsScreen() {
       }
     };
 
-    if (user?.token) fetchTickets();
-  }, [user]);
+    fetchTickets(); // Appelez la fonction pour récupérer les tickets
+  }, [user, setTickets]); // Ajoutez setTickets comme dépendance
 
   if (isLoading) {
     return (
@@ -119,9 +107,9 @@ export default function UserTicketsScreen() {
             <View className="flex-row items-center mb-4">
               {/* Icône de validation */}
               {item.status.toLowerCase() === "valid" ? (
-                <Ionicons name="checkmark-circle" size={24} color="#34D399" /> // Vert clair pour l'icône de validation
+                <Ionicons name="checkmark-circle" size={24} color="#34D399" />
               ) : (
-                <MaterialIcons name="cancel" size={24} color="#EF4444" /> // Rouge pour un statut non valide
+                <MaterialIcons name="cancel" size={24} color="#EF4444" />
               )}
               <Text
                 className={`ml-2 text-lg font-bold ${

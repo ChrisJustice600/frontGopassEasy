@@ -14,7 +14,7 @@ export default function ProfileScreen() {
   };
 
   const handleEditProfile = () => {
-    router.push("/(user)/(profile)/edit"); // Redirige vers l'écran de modification du profil
+    router.push("/(user)/(profile)/edit");
   };
 
   return (

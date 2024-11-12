@@ -6,17 +6,20 @@ import {
   type BarcodeScanningResult,
 } from "expo-camera";
 import React, { useState } from "react";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import Modal from "react-native-modal";
 
 export function QRScanner() {
   const [items, setItems] = useState<string[]>([]);
   const [permission, requestPermission] = useCameraPermissions();
   const [scanning, setScanning] = useState(true);
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [ticketInfo, setTicketInfo] = useState<any>(null);
 
   async function handleBarcodeScanned(data: BarcodeScanningResult) {
     const scannedItem = data.data;
+    console.log(scannedItem);
 
-    // Éviter de re-scanner le même code
     if (items.includes(scannedItem)) return;
 
     setItems((state) => [...state, scannedItem]);
@@ -29,48 +32,40 @@ export function QRScanner() {
 
       const { message, ticket } = response.data;
 
-      // Vérifiez si les données du ticket existent avant d'afficher l'alerte
       if (ticket) {
-        Alert.alert(
-          "Succès",
-          `${message}\n\nInformations du ticket:\n` +
-            `- ID: ${ticket.id}\n` +
-            `- Utilisateur: ${ticket.user?.username || "Non spécifié"}\n` +
-            `- Type de vol: ${ticket.flightType || "Non spécifié"}\n` +
-            `- Montant de la transaction: ${
-              ticket.transaction?.amount || "Non spécifié"
-            }\n` +
-            `- Méthode de paiement: ${
-              ticket.transaction?.paymentMethod || "Non spécifiée"
-            }\n`
-        );
+        setTicketInfo({
+          message,
+          username: ticket.user?.username || "Non spécifié",
+          flightType: ticket.flightType || "Non spécifié",
+          amount: ticket.transaction?.amount || "Non spécifié",
+          paymentMethod: ticket.transaction?.paymentMethod || "Non spécifiée",
+        });
+        setModalVisible(true);
       } else {
-        Alert.alert("Erreur", "Les informations du ticket sont incomplètes.");
+        setTicketInfo({
+          error: "Les informations du ticket sont incomplètes.",
+        });
+        setModalVisible(true);
       }
 
-      // Désactiver le scan temporairement
       setScanning(false);
     } catch (error: any) {
-      if (axios.isAxiosError(error) && error.response) {
-        // Si l'erreur vient du serveur, afficher le message d'erreur
-        console.error("Erreur serveur :", error.response.data);
-        Alert.alert(
-          "Erreur",
-          error.response.data.error ||
-            "Une erreur est survenue lors de la validation."
-        );
-      } else {
-        // Si l'erreur est liée au réseau ou autre
-        console.error("Erreur réseau :", error.message);
-        Alert.alert("Erreur", "Une erreur réseau est survenue.");
-      }
+      setTicketInfo({
+        error:
+          axios.isAxiosError(error) && error.response
+            ? error.response.data.error ||
+              "Une erreur est survenue lors de la validation."
+            : "Une erreur réseau est survenue.",
+      });
+      setModalVisible(true);
     }
   }
 
   function resetScanner() {
-    // Réinitialiser l'état pour permettre un nouveau scan
     setItems([]);
     setScanning(true);
+    setModalVisible(false);
+    setTicketInfo(null);
   }
 
   if (!permission) return null;
@@ -113,6 +108,33 @@ export function QRScanner() {
         }}
       >
         <ScannerIcon size={300} />
+
+        <Modal isVisible={isModalVisible} onBackdropPress={resetScanner}>
+          <View
+            style={{ backgroundColor: "white", padding: 20, borderRadius: 10 }}
+          >
+            {ticketInfo?.error ? (
+              <Text style={{ color: "red", fontSize: 18 }}>
+                {ticketInfo.error}
+              </Text>
+            ) : (
+              <>
+                <Text
+                  style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}
+                >
+                  {ticketInfo?.message}
+                </Text>
+                <Text>Utilisateur: {ticketInfo?.username}</Text>
+                <Text>Type de vol: {ticketInfo?.flightType}</Text>
+                <Text>Montant de la transaction: {ticketInfo?.amount}</Text>
+                <Text>Méthode de paiement: {ticketInfo?.paymentMethod}</Text>
+              </>
+            )}
+            <TouchableOpacity onPress={resetScanner} style={{ marginTop: 20 }}>
+              <Text style={{ color: "blue", textAlign: "center" }}>Fermer</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
 
         <View style={{ position: "absolute", top: 16, right: 16 }}>
           <TouchableOpacity

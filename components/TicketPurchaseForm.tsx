@@ -10,12 +10,14 @@ import {
   View,
 } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
+import { useTickets } from "../context/TicketsContext"; // Importez le hook du contexte
 
 const TicketPurchaseForm = () => {
   const [flightType, setFlightType] = useState("NATIONAL");
   const [paymentMethod, setPaymentMethod] = useState("CARD");
   const [loading, setLoading] = useState(false);
   const [qrCode, setQrCode] = useState(null); // Ajout de l'état QR code
+  const { setTickets } = useTickets(); // Utilisez le contexte des tickets
 
   const handlePurchase = async () => {
     setLoading(true);
@@ -33,6 +35,9 @@ const TicketPurchaseForm = () => {
       if (response.ok) {
         setQrCode(data.qrCode); // Stocke le QR code reçu
         Alert.alert("Succès", "Votre ticket a été acheté avec succès !");
+
+        // Mettre à jour les tickets dans le contexte
+        setTickets((prevTickets) => [...prevTickets, data]); // Ajoutez le nouveau ticket
       } else {
         Alert.alert("Erreur", data.error || "Erreur lors de l'achat du ticket");
       }
